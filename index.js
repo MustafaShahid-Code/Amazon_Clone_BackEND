@@ -5,11 +5,11 @@ const app =express();
 const cors =require('cors');
 const morgan=require('morgan');
 const port=process.env.PORT;
-
+const databse = require('./database')
 
 //MiddleWare
 app.use(cors());
-app.use(morgan());
+app.use(morgan('combined'));
 
 
 
