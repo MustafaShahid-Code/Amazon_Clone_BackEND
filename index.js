@@ -7,9 +7,14 @@ const morgan=require('morgan');
 const port=process.env.PORT;
 const databse = require('./database')
 
+
+//UserRoutes
+const UserRoutes = require('./routes/userRoutes');
+
 //MiddleWare
 app.use(cors());
-app.use(morgan('combined'));
+app.use(morgan('dev'));
+app.use("/api/users", UserRoutes);
 
 
 
