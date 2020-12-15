@@ -18,14 +18,8 @@ app.use("/api/users", UserRoutes);
 
 
 
-//ROUTES
-app.get('/',(req,res) =>{
 
-    res.status(200).json(
-        {
-         message:"Yuppie it's Working..!!!!"   
-        })
-})
+
 
 //ServerStart
 
