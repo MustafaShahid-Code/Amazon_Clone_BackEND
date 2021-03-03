@@ -18,7 +18,7 @@ router.use(
     extended: true,
   })
 )
-//DefaultRoute
+//#region  //DefaultRoute
 router.get("/", (req, res) => {
   return res.status(200).json({
     status: true,
@@ -27,75 +27,11 @@ router.get("/", (req, res) => {
 })
 //#endregion
 
-//#region // RegisterUserMethod
-// router.post(
-//   '/register',
-//   [
-//     // check empty fields
-//     check('Username').not().isEmpty().trim().escape(),
-//     check('Password').not().isEmpty().trim().escape(),
-
-//     // check email
-//     check('Email').isEmail().normalizeEmail()
-//   ],
-//   (req, res) => {
-//     const errors = validationResult(req);
-
-//     // check errors is not empty
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         "status": false,
-//         "errors": errors.array()
-//       });
-//     }
-
-//   //   //CheckingTheEMAIL
-//     User.findOne({ Email: req.body.Email }).then((user) => {
-//       if (user) {
-//         return res.status(409).json({
-//           "status": false,
-//           message: "This Email is already taken.."
-//         });
-//       }
-//       else {
-
-//         //PassswordIsHashingNOW
-//         const salt = bcrypt.genSaltSync(10)
-//         const hashedPassword = bcrypt.hashSync(req.body.Password, salt)
-
-//         const newUser = new User({
-//           Username: req.body.Username,
-//           Email: req.body.Email,
-//           Password: req.body.hashedPassword
-//         });
-//         newUser.save(User).then((result) => {
-//           return res.status(200).json({
-//             "status": true,
-//             message: "User Registered Successfully..!!",
-//             "userData": result
-//           });
-//         }).catch((error) => {
-//           return res.status(502).json({
-//             "status": false,
-//             "error": error
-//           });
-//         })
-//       }
-//     }).catch((error) => {
-//       return res.status(502).json({
-//         "status": false,
-//         "error": error
-//       });
-//     })
-
-//    }
-// );
-//#endregion
-
-// user register route
+//#region  // user register route
 // Access: public
 // url: http://localhost:500/api/users/register
 // method: POST
+
 router.post(
   "/register",
   [
@@ -189,8 +125,9 @@ router.post("/uploadProfilePic", (req, res) => {
     }
   })
 })
+//#endregion
 
-// user Login Route
+//#region // user Login Route
 // Access: public
 // url: http://localhost:500/api/users/login
 // method: POST
@@ -233,6 +170,19 @@ router.post(
             user.Password
           )
 
+          //Generate JWT
+
+          let token = jwt.sign(
+            {
+              id: user._id,
+              Email: user.Email,
+            },
+            token_key,
+            {
+              expiresIn: 3600,
+            }
+          )
+
           //Check IsPasswordMatched not Matched
 
           if (!isPasswordMatched) {
@@ -245,6 +195,8 @@ router.post(
           return res.status(200).json({
             status: true,
             message: "Login Successfullyy....",
+            token: token_key,
+            user: user,
           })
         }
       })
@@ -256,5 +208,6 @@ router.post(
       })
   }
 )
+//#endregion
 
 module.exports = router
