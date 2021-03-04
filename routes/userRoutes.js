@@ -6,7 +6,7 @@ const { check, validationResult } = require("express-validator")
 const jwt = require("jsonwebtoken")
 const moment = require("moment")
 const storage = require("./storage")
-
+const verifyToken = require("../middleware/verify_token")
 const User = require("./../Models/Users")
 const { default: getProfilePicUpload } = require("./storage")
 const token_key = process.env.TOKEN_KEY
@@ -134,9 +134,8 @@ router.post("/uploadProfilePic", (req, res) => {
 
 router.post(
   "/login",
-  // check empty fields
-
   [
+    // check empty fields
     check("Password").not().isEmpty().trim().escape(),
 
     // check email
@@ -150,32 +149,38 @@ router.post(
       return res.status(400).json({
         status: false,
         errors: errors.array(),
-        message: "Form Validation Error",
+        message: "Form validation error...",
       })
     }
-    User.findOne({
-      Email: req.body.Email,
-    })
+
+    User.findOne({ Email: req.body.Email })
       .then((user) => {
-        //if user email dont  Exist
+        // if user dont exist
         if (!user) {
           return res.status(404).json({
             status: false,
-            message: "User Email not Found..",
+            message: "User don't exists",
           })
         } else {
-          //Match User Password
-          let isPasswordMatched = bcrypt.compareSync(
+          // match user password
+          let isPasswordMatch = bcrypt.compareSync(
             req.body.Password,
             user.Password
           )
 
-          //Generate JWT
+          // check is not password match
+          if (!isPasswordMatch) {
+            return res.status(401).json({
+              status: false,
+              message: "Password don't match...",
+            })
+          }
 
+          // JSON Web Token Generate
           let token = jwt.sign(
             {
               id: user._id,
-              Email: user.Email,
+              email: user.Email,
             },
             token_key,
             {
@@ -183,19 +188,11 @@ router.post(
             }
           )
 
-          //Check IsPasswordMatched not Matched
-
-          if (!isPasswordMatched) {
-            return res.status(401).json({
-              status: false,
-              message: "Password Does Not Matched..",
-            })
-          }
-          //If Login Success
+          // if login success
           return res.status(200).json({
             status: true,
-            message: "Login Successfullyy....",
-            token: token_key,
+            message: "User login success",
+            token: token,
             user: user,
           })
         }
@@ -203,11 +200,20 @@ router.post(
       .catch((error) => {
         return res.status(502).json({
           status: false,
-          message: "Database Error....",
+          message: "Database error...",
         })
       })
   }
 )
+
 //#endregion
+
+// router.get("/testJWT", verifyToken, (req, res) => {
+//   console.log(req.user)
+//   return res.status(200).json({
+//     status: true,
+//     message: "JWT Tokens are working.",
+//   })
+// })
 
 module.exports = router
